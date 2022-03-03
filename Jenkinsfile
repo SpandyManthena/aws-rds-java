@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        maven 'maven-3.8.4' 
+    }
       environment {
         DATE = new Date().format('yy.M')
         TAG = "${DATE}.${BUILD_NUMBER}"
@@ -13,7 +16,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    docker.build("deepika2chebolu/aws-rds:${TAG}")
+                    docker.build("spandy1932/aws-rds:${TAG}")
                 }
             }
         }
@@ -21,17 +24,20 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com','docker_credential') {
-                        docker.image("deepika2chebolu/aws-rds:${TAG}").push()
-                        docker.image("deepika2chebolu/aws-rds:${TAG}").push("latest")
+                        docker.image("spandy1932/aws-rds:${TAG}").push()
+                        docker.image("spandy1932/aws-rds:${TAG}").push("latest")
                     }
                 }
             }
         }
         stage('deploy') {
             steps {
-                sshagent(credentials:['n1']) {
-                    sh 'ssh -T -o StrictHostKeyChecking=no centos@3.83.247.21'
-                sh 'docker container run -dt --name myapp -p 8090:8080 deepika2chebolu/aws-rds:${TAG}'
+                sshagent(credentials:['docker']) {
+                    sh 'ssh -T -o StrictHostKeyChecking=no remote@172.31.85.115'
+                    sh 'docker stop aws-rds | true'
+                    sh 'docker rm aws-rds | true'
+                    sh 'docker run --name aws-rds -d -p 9005:8080 spandy1932/aws-rds:${TAG}'
+         
                 }
             }
         }
