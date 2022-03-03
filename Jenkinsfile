@@ -35,7 +35,7 @@ pipeline {
                 node('slave') {
                     sh 'docker stop aws-rds | true'
                     sh 'docker rm aws-rds | true'
-                    sh 'docker run --name aws-rds -d -p 9005:8080 spandy1932/aws-rds:${TAG}'
+                    sh 'docker run --name aws-rds -d -p 9090:8080 spandy1932/aws-rds:${TAG}'
          
                 }
             }
